@@ -1,0 +1,198 @@
+<div class="modal-overlay" (click)="close.emit()">
+  <div class="modal-box glass-card" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div>
+        <span class="badge badge-gold">Curation Submission</span>
+        <h3 class="modal-title">Submit Fine Art Masterpiece</h3>
+      </div>
+      <button class="btn-icon" (click)="close.emit()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Modal Form Body -->
+    <div class="modal-body-scroll">
+      <div class="form-grid">
+        <!-- Left: Image upload dropzone & preview -->
+        <div class="upload-zone-col">
+          <label class="form-label">Photograph Source</label>
+          
+          <div class="dropzone" (click)="fileInput.click()">
+            <input 
+              #fileInput 
+              type="file" 
+              accept="image/*" 
+              (change)="onFileSelected($event)" 
+              style="display:none"
+            />
+            
+            <div *ngIf="!previewUrl" class="dropzone-empty">
+              <div class="upload-icon-circle">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </div>
+              <p class="drop-text">Click or drag image file here</p>
+              <span class="drop-sub">PNG, JPG, WEBP up to 25MB</span>
+            </div>
+
+            <div *ngIf="previewUrl" class="dropzone-preview">
+              <img [src]="previewUrl" alt="Upload Preview" class="preview-img"/>
+              <span class="change-overlay">Click to change image</span>
+            </div>
+          </div>
+
+          <!-- Or Image URL input -->
+          <div class="or-separator">
+            <span>OR ENTER DIRECT IMAGE URL</span>
+          </div>
+
+          <div class="form-group">
+            <input 
+              type="url" 
+              placeholder="https://images.unsplash.com/..." 
+              [(ngModel)]="imageUrl" 
+              (ngModelChange)="onUrlChange($event)"
+              class="form-control"
+            />
+          </div>
+
+          <!-- Orientation selector -->
+          <div class="form-group">
+            <label class="form-label">Orientation Format</label>
+            <div class="orientation-pills">
+              <button 
+                type="button"
+                class="orient-btn" 
+                [class.active]="orientation === 'landscape'" 
+                (click)="orientation = 'landscape'"
+              >Landscape (16:10)</button>
+              <button 
+                type="button"
+                class="orient-btn" 
+                [class.active]="orientation === 'portrait'" 
+                (click)="orientation = 'portrait'"
+              >Portrait (4:5)</button>
+              <button 
+                type="button"
+                class="orient-btn" 
+                [class.active]="orientation === 'square'" 
+                (click)="orientation = 'square'"
+              >Square (1:1)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Metadata & EXIF inputs -->
+        <div class="metadata-col">
+          <!-- Title & Category -->
+          <div class="form-group">
+            <label class="form-label">Work Title *</label>
+            <input 
+              type="text" 
+              placeholder="e.g. Dawn Solitude over Fitz Roy" 
+              [(ngModel)]="title" 
+              class="form-control"
+              required
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group half">
+              <label class="form-label">Genre Category</label>
+              <select [(ngModel)]="category" class="form-control">
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+
+            <div class="form-group half">
+              <label class="form-label">Artist Name</label>
+              <input 
+                type="text" 
+                placeholder="e.g. Elena Rostova" 
+                [(ngModel)]="photographerName" 
+                class="form-control"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Capture Location</label>
+            <input 
+              type="text" 
+              placeholder="e.g. Patagonia, Argentina" 
+              [(ngModel)]="photographerLocation" 
+              class="form-control"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Curatorial Story / Description</label>
+            <textarea 
+              rows="3" 
+              placeholder="Describe the aesthetic vision, atmospheric conditions, or creative concept..." 
+              [(ngModel)]="description" 
+              class="form-control"
+            ></textarea>
+          </div>
+
+          <!-- Camera Technical Specs -->
+          <div class="exif-fieldset">
+            <span class="fieldset-title">Camera & Technical EXIF</span>
+            
+            <div class="form-row">
+              <div class="form-group half">
+                <label class="form-label-sm">Camera Body</label>
+                <input type="text" [(ngModel)]="camera" class="form-control-sm" placeholder="Sony A7R V"/>
+              </div>
+              <div class="form-group half">
+                <label class="form-label-sm">Lens Mounted</label>
+                <input type="text" [(ngModel)]="lens" class="form-control-sm" placeholder="24-70mm f/2.8"/>
+              </div>
+            </div>
+
+            <div class="form-row-3">
+              <div class="form-group">
+                <label class="form-label-sm">Aperture</label>
+                <input type="text" [(ngModel)]="aperture" class="form-control-sm" placeholder="f/2.8"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label-sm">Shutter</label>
+                <input type="text" [(ngModel)]="shutterSpeed" class="form-control-sm" placeholder="1/500s"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label-sm">ISO</label>
+                <input type="text" [(ngModel)]="iso" class="form-control-sm" placeholder="100"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tags (comma separated)</label>
+            <input 
+              type="text" 
+              placeholder="Alpine, Sunrise, Monochrome, Reflection" 
+              [(ngModel)]="tags" 
+              class="form-control"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="close.emit()" [disabled]="isSubmitting">
+        Cancel
+      </button>
+      <button class="btn btn-primary" (click)="submitPhoto()" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting">Publish Masterpiece</span>
+        <span *ngIf="isSubmitting">Publishing to Exhibition...</span>
+      </button>
+    </div>
+  </div>
+</div>
+

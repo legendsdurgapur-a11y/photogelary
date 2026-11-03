@@ -1,0 +1,59 @@
+<div class="app-root-layout">
+  <!-- Sticky Glass Navigation -->
+  <app-navbar
+    (openUpload)="showUploadModal = true"
+    (openBooking)="showBookingModal = true"
+  ></app-navbar>
+
+  <main>
+    <!-- Hero Slider -->
+    <app-hero
+      (exploreClick)="scrollToGallery()"
+      (viewSeriesClick)="scrollToAlbums()"
+    ></app-hero>
+
+    <!-- Main Exhibition Gallery -->
+    <app-gallery
+      (selectPhoto)="onSelectPhoto($event)"
+    ></app-gallery>
+
+    <!-- Curated Thematic Albums -->
+    <app-albums
+      (albumSelected)="onAlbumSelected($event)"
+    ></app-albums>
+
+    <!-- Featured Master Artists -->
+    <app-photographers></app-photographers>
+
+    <!-- Testimonials / Patronage -->
+    <app-testimonials></app-testimonials>
+  </main>
+
+  <!-- Editorial Footer -->
+  <app-footer></app-footer>
+
+  <!-- Fullscreen Lightbox Modal -->
+  <app-lightbox
+    *ngIf="selectedPhoto"
+    [photo]="selectedPhoto"
+    [allPhotos]="photos"
+    (close)="closeLightbox()"
+    (next)="nextLightboxPhoto()"
+    (prev)="prevLightboxPhoto()"
+  ></app-lightbox>
+
+  <!-- Upload Modal -->
+  <app-upload-modal
+    *ngIf="showUploadModal"
+    (close)="showUploadModal = false"
+  ></app-upload-modal>
+
+  <!-- Booking Modal -->
+  <app-booking-modal
+    *ngIf="showBookingModal"
+    (close)="showBookingModal = false"
+  ></app-booking-modal>
+
+  <!-- Global Toast Notifications -->
+  <app-toast></app-toast>
+</div>

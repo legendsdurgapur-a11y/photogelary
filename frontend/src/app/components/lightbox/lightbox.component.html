@@ -1,0 +1,228 @@
+<div class="lightbox-overlay" *ngIf="photo" (click)="closeModal()">
+  <div class="lightbox-container" (click)="$event.stopPropagation()">
+
+    <!-- Top Action Bar -->
+    <div class="lightbox-topbar">
+      <div class="topbar-left">
+        <span class="badge badge-gold">{{ photo.category }}</span>
+        <h4 class="topbar-title">{{ photo.title }}</h4>
+      </div>
+
+      <div class="topbar-actions">
+        <!-- Slideshow button -->
+        <button 
+          class="btn-icon" 
+          [class.active]="isPlayingSlideshow"
+          (click)="toggleSlideshow()"
+          [title]="isPlayingSlideshow ? 'Pause Slideshow (Space)' : 'Play Slideshow (Space)'"
+        >
+          <svg *ngIf="!isPlayingSlideshow" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          <svg *ngIf="isPlayingSlideshow" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="4" width="4" height="16"/>
+            <rect x="14" y="4" width="4" height="16"/>
+          </svg>
+        </button>
+
+        <!-- Zoom Controls -->
+        <div class="zoom-controls">
+          <button class="btn-icon-sm" (click)="zoomOut()" [disabled]="zoomLevel <= 1" title="Zoom Out">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <span class="zoom-text">{{ (zoomLevel * 100).toFixed(0) }}%</span>
+          <button class="btn-icon-sm" (click)="zoomIn()" [disabled]="zoomLevel >= 2.5" title="Zoom In">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <button *ngIf="zoomLevel > 1" class="btn-icon-sm" (click)="resetZoom()" title="Reset Zoom">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+        </div>
+
+        <!-- Download Action -->
+        <button class="btn-icon" (click)="downloadPhoto()" title="Download Original">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </button>
+
+        <!-- Share Action -->
+        <button class="btn-icon" (click)="sharePhoto()" title="Copy Link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3"/>
+            <circle cx="6" cy="12" r="3"/>
+            <circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+        </button>
+
+        <!-- Toggle Info Sidebar -->
+        <button class="btn-icon" [class.active]="showSidebar" (click)="toggleSidebar()" title="Toggle Camera & Story Panel">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <line x1="15" y1="3" x2="15" y2="21"/>
+          </svg>
+        </button>
+
+        <!-- Close Modal -->
+        <button class="btn-icon btn-close" (click)="closeModal()" title="Close (Esc)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Lightbox Body (Image stage + Sidebar) -->
+    <div class="lightbox-stage">
+      <!-- Image Viewport Area -->
+      <div class="image-viewport" [class.sidebar-hidden]="!showSidebar">
+        <!-- Prev Arrow -->
+        <button class="stage-nav-arrow arrow-prev" (click)="goPrev()" title="Previous (Left Arrow)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+
+        <!-- High-res Image Wrapper -->
+        <div class="stage-img-container" [style.transform]="'scale(' + zoomLevel + ')'">
+          <img 
+            [src]="photo.imageUrl" 
+            [alt]="photo.title"
+            class="stage-main-img"
+          />
+        </div>
+
+        <!-- Next Arrow -->
+        <button class="stage-nav-arrow arrow-next" (click)="goNext()" title="Next (Right Arrow)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      <!-- Info & Metadata Sidebar -->
+      <aside class="lightbox-sidebar" *ngIf="showSidebar">
+        <div class="sidebar-scrollable">
+          <!-- Photographer Header -->
+          <div class="sidebar-photographer-card glass-card">
+            <img [src]="photo.photographer.avatar" [alt]="photo.photographer.name" class="photographer-avatar"/>
+            <div class="photographer-details">
+              <span class="photographer-name">{{ photo.photographer.name }}</span>
+              <span class="photographer-handle">{{ photo.photographer.handle }}</span>
+              <span class="photographer-location">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                {{ photo.photographer.location }}
+              </span>
+            </div>
+
+            <!-- Like button in sidebar -->
+            <button 
+              class="sidebar-like-btn" 
+              [class.liked]="photo.isLiked"
+              (click)="toggleLike()"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" [attr.fill]="photo.isLiked ? '#f43f5e' : 'none'" [attr.stroke]="photo.isLiked ? '#f43f5e' : '#fff'" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <span>{{ photo.likes }}</span>
+            </button>
+          </div>
+
+          <!-- Description / Story -->
+          <div class="sidebar-section">
+            <h5 class="section-label">Curator's Note</h5>
+            <p class="photo-description">{{ photo.description }}</p>
+          </div>
+
+          <!-- Camera EXIF Technical Details -->
+          <div class="sidebar-section" *ngIf="photo.exif">
+            <h5 class="section-label">Technical EXIF Data</h5>
+            <div class="exif-grid">
+              <div class="exif-cell">
+                <span class="exif-title">Camera Body</span>
+                <span class="exif-val">{{ photo.exif.camera }}</span>
+              </div>
+              <div class="exif-cell">
+                <span class="exif-title">Lens Mounted</span>
+                <span class="exif-val">{{ photo.exif.lens }}</span>
+              </div>
+              <div class="exif-cell">
+                <span class="exif-title">Focal Length</span>
+                <span class="exif-val">{{ photo.exif.focalLength }}</span>
+              </div>
+              <div class="exif-cell">
+                <span class="exif-title">Aperture</span>
+                <span class="exif-val">{{ photo.exif.aperture }}</span>
+              </div>
+              <div class="exif-cell">
+                <span class="exif-title">Shutter Speed</span>
+                <span class="exif-val">{{ photo.exif.shutterSpeed }}</span>
+              </div>
+              <div class="exif-cell">
+                <span class="exif-title">Sensitivity (ISO)</span>
+                <span class="exif-val">{{ photo.exif.iso }}</span>
+              </div>
+              <div class="exif-cell" *ngIf="photo.exif.dimensions">
+                <span class="exif-title">Native Resolution</span>
+                <span class="exif-val">{{ photo.exif.dimensions }}</span>
+              </div>
+              <div class="exif-cell">
+                <span class="exif-title">Date Captured</span>
+                <span class="exif-val">{{ photo.date }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div class="sidebar-section" *ngIf="photo.tags && photo.tags.length > 0">
+            <h5 class="section-label">Tags & Genres</h5>
+            <div class="tags-cloud">
+              <span *ngFor="let tag of photo.tags" class="tag-pill">#{{ tag }}</span>
+            </div>
+          </div>
+
+          <!-- Critique & Impressions / Comments -->
+          <div class="sidebar-section comments-section">
+            <h5 class="section-label">Artistic Impressions ({{ photo.comments ? photo.comments.length : 0 }})</h5>
+
+            <!-- Comment Input -->
+            <div class="add-comment-box">
+              <input 
+                type="text" 
+                placeholder="Your name or handle..." 
+                [(ngModel)]="commentAuthor" 
+                class="comment-input"
+              />
+              <textarea 
+                placeholder="Share your artistic impression..." 
+                [(ngModel)]="commentText" 
+                rows="2"
+                class="comment-textarea"
+              ></textarea>
+              <button 
+                class="btn btn-primary btn-sm" 
+                (click)="submitComment()"
+                [disabled]="submittingComment || !commentText.trim()"
+              >
+                <span>Post Impression</span>
+              </button>
+            </div>
+
+            <!-- Comments List -->
+            <div class="comments-list">
+              <div *ngFor="let c of photo.comments" class="comment-item">
+                <div class="comment-head">
+                  <span class="comment-user">{{ c.user }}</span>
+                  <span class="comment-time">{{ c.time }}</span>
+                </div>
+                <p class="comment-content">{{ c.text }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+

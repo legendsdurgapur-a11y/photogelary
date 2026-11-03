@@ -1,0 +1,233 @@
+<section id="gallery" class="gallery-section">
+  <div class="container">
+    <!-- Section Title & Subtitle -->
+    <div class="section-header">
+      <span class="section-tag">Permanent Exhibition</span>
+      <h2 class="section-title">Masterworks in Visual Resonance</h2>
+      <p class="section-desc">
+        Explore a curated anthology of fine-art photography captured across the planet's most remote latitudes and vibrant metropolises.
+      </p>
+    </div>
+
+    <!-- Category Filter Tabs -->
+    <div class="category-tabs-container">
+      <div class="category-tabs-scroll">
+        <button 
+          *ngFor="let cat of categories"
+          class="cat-tab-btn"
+          [class.active]="cat === activeCategory"
+          (click)="selectCategory(cat)"
+        >
+          <span>{{ cat }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Toolbar: Search / Orientation / Sort / View Switch -->
+    <div class="gallery-toolbar glass-card">
+      <div class="toolbar-left">
+        <!-- Search filter input -->
+        <div class="filter-search-input">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input 
+            type="text" 
+            placeholder="Filter by lens, location, keyword..." 
+            [(ngModel)]="searchQuery" 
+            (ngModelChange)="fetchPhotos()"
+          />
+          <button *ngIf="searchQuery" class="filter-clear-btn" (click)="searchQuery=''; fetchPhotos()">
+            &times;
+          </button>
+        </div>
+
+        <!-- Orientation Filter -->
+        <div class="select-wrapper">
+          <label>Orientation:</label>
+          <select [(ngModel)]="selectedOrientation" (change)="onOrientationChange(selectedOrientation)">
+            <option value="All">All Formats</option>
+            <option value="landscape">Landscape (16:9)</option>
+            <option value="portrait">Portrait (4:5)</option>
+            <option value="square">Square (1:1)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <!-- Sort By Dropdown -->
+        <div class="select-wrapper">
+          <label>Sort:</label>
+          <select [(ngModel)]="selectedSort" (change)="onSortChange(selectedSort)">
+            <option value="newest">Recently Added</option>
+            <option value="popular">Most Applauded</option>
+            <option value="views">Most Viewed</option>
+            <option value="oldest">Archive Chronological</option>
+          </select>
+        </div>
+
+        <!-- View Mode Switch -->
+        <div class="view-switch-group">
+          <button 
+            class="view-btn" 
+            [class.active]="viewMode === 'masonry'" 
+            (click)="viewMode = 'masonry'" 
+            title="Masonry Grid"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="9"/>
+              <rect x="14" y="3" width="7" height="5"/>
+              <rect x="14" y="12" width="7" height="9"/>
+              <rect x="3" y="16" width="7" height="5"/>
+            </svg>
+          </button>
+          <button 
+            class="view-btn" 
+            [class.active]="viewMode === 'cinematic'" 
+            (click)="viewMode = 'cinematic'" 
+            title="Cinematic Wide"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="7"/>
+              <rect x="3" y="13" width="18" height="7"/>
+            </svg>
+          </button>
+        </div>
+
+        <span class="photos-count-badge">
+          {{ photos.length }} photographs
+        </span>
+      </div>
+    </div>
+
+    <!-- Active Filter Tags indicator -->
+    <div class="active-filters-bar" *ngIf="activeCategory !== 'All' || selectedOrientation !== 'All' || searchQuery">
+      <span class="active-label">Active Filters:</span>
+      <span class="filter-chip" *ngIf="activeCategory !== 'All'">
+        Category: {{ activeCategory }}
+        <button (click)="selectCategory('All')">&times;</button>
+      </span>
+      <span class="filter-chip" *ngIf="selectedOrientation !== 'All'">
+        Format: {{ selectedOrientation }}
+        <button (click)="onOrientationChange('All')">&times;</button>
+      </span>
+      <span class="filter-chip" *ngIf="searchQuery">
+        Query: "{{ searchQuery }}"
+        <button (click)="searchQuery=''; fetchPhotos()">&times;</button>
+      </span>
+      <button class="clear-all-filters-btn" (click)="clearFilters()">
+        Reset all filters
+      </button>
+    </div>
+
+    <!-- Loading Skeleton -->
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner-aperture"></div>
+      <p>Developing negative masterworks...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state glass-card" *ngIf="!loading && photos.length === 0">
+      <div class="empty-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <h3>No photographs match your criteria</h3>
+      <p>Try refining your search keyword or switching categories.</p>
+      <button class="btn btn-outline-gold" (click)="clearFilters()">Reset Filters</button>
+    </div>
+
+    <!-- Gallery Grid (Masonry or Cinematic) -->
+    <div 
+      *ngIf="!loading && photos.length > 0"
+      class="gallery-grid"
+      [class.cinematic-grid]="viewMode === 'cinematic'"
+    >
+      <div 
+        *ngFor="let photo of photos" 
+        class="photo-card"
+        [class.portrait-card]="photo.orientation === 'portrait'"
+        [class.square-card]="photo.orientation === 'square'"
+        (click)="openLightbox(photo)"
+      >
+        <div class="photo-image-wrapper">
+          <img 
+            [src]="photo.thumbnailUrl" 
+            [alt]="photo.title"
+            loading="lazy"
+            class="gallery-img"
+          />
+
+          <!-- Quick Category Pill -->
+          <div class="card-category-badge">
+            {{ photo.category }}
+          </div>
+
+          <!-- Quick Like Button -->
+          <button 
+            class="card-like-btn" 
+            [class.liked]="photo.isLiked"
+            (click)="toggleLike(photo, $event)"
+            title="Applause / Favorite"
+          >
+            <svg class="heart-icon" width="18" height="18" viewBox="0 0 24 24" [attr.fill]="photo.isLiked ? '#f43f5e' : 'none'" [attr.stroke]="photo.isLiked ? '#f43f5e' : '#fff'" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <span class="like-num">{{ photo.likes }}</span>
+
+            <!-- Floating Heart Animation -->
+            <span *ngIf="animatingLikes[photo.id]" class="floating-heart">&hearts;</span>
+          </button>
+
+          <!-- Hover Overlay -->
+          <div class="photo-hover-overlay">
+            <div class="overlay-top">
+              <div class="photographer-chip">
+                <img [src]="photo.photographer.avatar" [alt]="photo.photographer.name" class="avatar-img"/>
+                <div class="photographer-meta">
+                  <span class="photographer-name">{{ photo.photographer.name }}</span>
+                  <span class="photographer-loc">{{ photo.photographer.location }}</span>
+                </div>
+              </div>
+
+              <div class="expand-indicator">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="15 3 21 3 21 9"/>
+                  <polyline points="9 21 3 21 3 15"/>
+                  <line x1="21" y1="3" x2="14" y2="10"/>
+                  <line x1="3" y1="21" x2="10" y2="14"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="overlay-bottom">
+              <h3 class="photo-title">{{ photo.title }}</h3>
+              
+              <!-- Camera EXIF Summary -->
+              <div class="exif-mini-bar" *ngIf="photo.exif">
+                <span class="camera-tag">{{ photo.exif.camera }}</span>
+                <span class="lens-tag">{{ photo.exif.focalLength }} &bull; {{ photo.exif.aperture }} &bull; {{ photo.exif.iso }} ISO</span>
+              </div>
+
+              <!-- Tags list -->
+              <div class="photo-tags-row">
+                <span 
+                  *ngFor="let tag of photo.tags.slice(0, 3)" 
+                  class="photo-tag-chip"
+                  (click)="filterByTag(tag, $event)"
+                >
+                  #{{ tag }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+

@@ -1,0 +1,23 @@
+{
+  "name": "lumina-photo-gallery",
+  "version": "1.0.0",
+  "description": "LUMINA - Professional Fine Art Photography Gallery (Angular + Node.js/Express)",
+  "scripts": {
+    "start": "node backend/server.js",
+    "backend": "node backend/server.js",
+    "frontend": "cd frontend && ng serve",
+    "build": "cd frontend && ng build"
+  },
+  "keywords": [
+    "angular",
+    "photography",
+    "gallery",
+    "fine-art",
+    "portfolio",
+    "nodejs",
+    "express"
+  ],
+  "author": "Lumina Studios",
+  "license": "ISC"
+}
+

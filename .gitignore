@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Angular & Build outputs
+.angular/
+*/.angular/
+frontend/dist/
+tmp/
+out-tsc/
+
+# Backend uploads & logs
+backend/uploads/*
+!backend/uploads/.gitkeep
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & Editor
+.env
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
